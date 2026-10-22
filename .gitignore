@@ -1,0 +1,135 @@
+# =========================
+# .NET build output
+# =========================
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+artifacts/
+publish/
+_ReSharper.Caches/
+_TeamCity*
+_UpgradeReport_Files/
+*.VisualState.xml
+*.nupkg
+*.snupkg
+*.pidb
+*.svclog
+*.psess
+*.vsp
+*.vspx
+*.sap
+*.user
+*.suo
+*.userosscache
+*.userprefs
+*.sln.docstates
+
+# Rider / IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+*.DotSettings.user
+
+# Visual Studio
+.vs/
+*.csproj.user
+*.vbproj.user
+*.fsproj.user
+*.dbproj.user
+*.DotSettings
+*.VC.db
+*.VC.opendb
+*.opendb
+*.opensdf
+*.sdf
+*.cachefile
+*.VC.db
+*.VC.VC.opendb
+ipch/
+*.tlog
+*.log
+*.vspscc
+*.vssscc
+.vsconfig
+
+# Visual Studio Code
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# Test output
+[Tt]est[Rr]esults/
+[Bb]uild[Ll]og.*
+*.trx
+*.coverage
+*.coveragexml
+coverage/
+*.cover
+*.testlog
+
+# NuGet
+packages/
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+.nuget/
+.nuget-cache/
+
+# .NET local tools / SDK
+.dotnet/
+.dotnet-tools/
+.dotnet-cli-home/
+global.json.lock
+
+# Node tooling (future docs/site)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+secrets.json
+appsettings.Local.json
+
+# Local-only planning notes
+.local/
+
+# Application data accidentally created in the repository
+FloatingWordsData/
+AppData/
+state.db
+settings.local.json
+
+# OS metadata
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Temporary and editor caches
+*.tmp
+*.temp
+*.bak
+*.orig
+*.rej
+*.cache
+*.swp
+*.swo
+*~

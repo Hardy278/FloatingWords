@@ -1,0 +1,31 @@
+<Project>
+
+  <PropertyGroup>
+    <!-- Shared project metadata -->
+    <Product>FloatingWords</Product>
+    <AssemblyTitle>FloatingWords</AssemblyTitle>
+    <Description>A quiet, always-on-top WPF vocabulary card for passive language exposure.</Description>
+    <Authors>Hardy Zhu</Authors>
+    <Company>FloatingWords</Company>
+    <Copyright>Copyright © 2026 Hardy Zhu</Copyright>
+    <VersionPrefix>0.1.0</VersionPrefix>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
+    <!-- Shared compiler defaults -->
+    <LangVersion>14</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+
+    <!-- Static analysis -->
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+    <!-- Build performance -->
+    <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
+  </PropertyGroup>
+
+</Project>

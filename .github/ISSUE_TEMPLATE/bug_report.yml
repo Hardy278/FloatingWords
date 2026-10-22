@@ -1,0 +1,98 @@
+name: Bug 报告
+description: 报告一个可复现的缺陷、崩溃或异常行为
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢你帮助改进 FloatingWords。
+
+        提交前请先搜索现有 Issue，确认该问题尚未被报告。若问题涉及安全漏洞，请不要公开提交 Issue，请通过维护者的私下联系方式报告。
+
+  - type: input
+    id: version
+    attributes:
+      label: 版本或提交
+      description: 使用哪个版本、Release 或 commit？
+      placeholder: 例如 v0.1.0 / commit SHA
+    validations:
+      required: true
+
+  - type: dropdown
+    id: windows
+    attributes:
+      label: Windows 版本
+      options:
+        - Windows 11
+        - Windows 10
+        - Windows Server / 其他
+        - 不确定
+    validations:
+      required: true
+
+  - type: dropdown
+    id: mode
+    attributes:
+      label: 阅读模式
+      options:
+        - Flash 定时闪卡
+        - 点击优先
+        - 开始页或设置页
+        - 不确定
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 请提供最小、可重复的操作步骤。
+      placeholder: |
+        1. 启动 FloatingWords
+        2. 点击 ...
+        3. 将鼠标 ...
+        4. 看到 ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望行为
+      placeholder: 你认为应该发生什么？
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为
+      description: 实际发生了什么？如有异常，请附上错误信息。
+      placeholder: 描述实际结果、异常信息或截图。
+    validations:
+      required: true
+
+  - type: input
+    id: dpi
+    attributes:
+      label: 显示环境
+      description: 屏幕数量与缩放比例可能会有帮助。
+      placeholder: 例如 单屏 2560x1440 @ 150%
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志
+      description: 可粘贴 `%AppData%\FloatingWords\logs` 中的相关日志。请先移除个人信息。
+      render: text
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: 确认
+      options:
+        - label: 我搜索过现有 Issue，未发现相同问题。
+          required: true
+        - label: 我已移除日志和截图中的个人隐私信息。
+          required: true
