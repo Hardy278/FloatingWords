@@ -1,3 +1,8 @@
 <Solution>
   <Project Path="FloatingWords/FloatingWords.csproj" />
+  <Project Path="FloatingWords.Domain/FloatingWords.Domain.csproj" />
+  <Project Path="FloatingWords.Application/FloatingWords.Application.csproj" />
+  <Project Path="FloatingWords.Infrastructure/FloatingWords.Infrastructure.csproj" />
+  <Project Path="tests/FloatingWords.Domain.Tests/FloatingWords.Domain.Tests.csproj" />
+  <Project Path="tests/FloatingWords.Infrastructure.Tests/FloatingWords.Infrastructure.Tests.csproj" />
 </Solution>

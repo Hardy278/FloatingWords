@@ -3,10 +3,692 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:FloatingWords"
+        xmlns:vm="clr-namespace:FloatingWords.Design"
+        xmlns:sys="clr-namespace:System;assembly=System.Runtime"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        d:DataContext="{d:DesignInstance vm:MainWindowDesignData, IsDesignTimeCreatable=True}"
+        Title="词浮"
+        Width="508"
+        Height="388"
+        MinWidth="448"
+        MinHeight="368"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="CanResize"
+        ShowInTaskbar="False"
+        ShowActivated="False"
+        Topmost="True"
+        WindowStartupLocation="Manual"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Display"
+        TextOptions.TextRenderingMode="Grayscale"
+        FontFamily="Segoe UI, Microsoft YaHei UI"
+        Foreground="#F0F3FA"
+        MouseEnter="Window_MouseEnter"
+        MouseLeave="Window_MouseLeave">
 
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+
+        <!--
+            文本角色默认值，与 SettingsDefaults.CreateDefaultStyle 保持一致。
+            运行时 StyleResourceApplicator.Apply 会把用户设置写进同一份资源字典（同名键覆盖），
+            这里的作用是兜底：不执行代码的静态预览也能拿到正确的字体字号。
+        -->
+        <FontFamily x:Key="Role_headword_FontFamily">Georgia</FontFamily>
+        <sys:Double x:Key="Role_headword_FontSize">26</sys:Double>
+        <FontWeight x:Key="Role_headword_FontWeight">Bold</FontWeight>
+        <FontStyle x:Key="Role_headword_FontStyle">Normal</FontStyle>
+        <SolidColorBrush x:Key="Role_headword_Foreground" Color="#FFFFFF" />
+
+        <FontFamily x:Key="Role_phonetic_FontFamily">Segoe UI</FontFamily>
+        <sys:Double x:Key="Role_phonetic_FontSize">13</sys:Double>
+        <FontWeight x:Key="Role_phonetic_FontWeight">Normal</FontWeight>
+        <FontStyle x:Key="Role_phonetic_FontStyle">Italic</FontStyle>
+        <SolidColorBrush x:Key="Role_phonetic_Foreground" Color="#B8C4D9" />
+
+        <FontFamily x:Key="Role_pos_FontFamily">Segoe UI</FontFamily>
+        <sys:Double x:Key="Role_pos_FontSize">12</sys:Double>
+        <FontWeight x:Key="Role_pos_FontWeight">SemiBold</FontWeight>
+        <FontStyle x:Key="Role_pos_FontStyle">Italic</FontStyle>
+        <SolidColorBrush x:Key="Role_pos_Foreground" Color="#F0B57A" />
+
+        <FontFamily x:Key="Role_definition_FontFamily">Microsoft YaHei UI</FontFamily>
+        <sys:Double x:Key="Role_definition_FontSize">16</sys:Double>
+        <FontWeight x:Key="Role_definition_FontWeight">Normal</FontWeight>
+        <FontStyle x:Key="Role_definition_FontStyle">Normal</FontStyle>
+        <SolidColorBrush x:Key="Role_definition_Foreground" Color="#F0F3FA" />
+
+        <FontFamily x:Key="Role_definitionTranslation_FontFamily">Microsoft YaHei UI</FontFamily>
+        <sys:Double x:Key="Role_definitionTranslation_FontSize">14</sys:Double>
+        <FontWeight x:Key="Role_definitionTranslation_FontWeight">Normal</FontWeight>
+        <FontStyle x:Key="Role_definitionTranslation_FontStyle">Normal</FontStyle>
+        <SolidColorBrush x:Key="Role_definitionTranslation_Foreground" Color="#C7D0E0" />
+
+        <FontFamily x:Key="Role_example_FontFamily">Georgia</FontFamily>
+        <sys:Double x:Key="Role_example_FontSize">13</sys:Double>
+        <FontWeight x:Key="Role_example_FontWeight">Normal</FontWeight>
+        <FontStyle x:Key="Role_example_FontStyle">Italic</FontStyle>
+        <SolidColorBrush x:Key="Role_example_Foreground" Color="#B5C0D3" />
+
+        <FontFamily x:Key="Role_exampleTranslation_FontFamily">Microsoft YaHei UI</FontFamily>
+        <sys:Double x:Key="Role_exampleTranslation_FontSize">12</sys:Double>
+        <FontWeight x:Key="Role_exampleTranslation_FontWeight">Normal</FontWeight>
+        <FontStyle x:Key="Role_exampleTranslation_FontStyle">Normal</FontStyle>
+        <SolidColorBrush x:Key="Role_exampleTranslation_Foreground" Color="#919EB5" />
+
+        <FontFamily x:Key="Role_label_FontFamily">Segoe UI</FontFamily>
+        <sys:Double x:Key="Role_label_FontSize">10.5</sys:Double>
+        <FontWeight x:Key="Role_label_FontWeight">Normal</FontWeight>
+        <FontStyle x:Key="Role_label_FontStyle">Normal</FontStyle>
+        <SolidColorBrush x:Key="Role_label_Foreground" Color="#C9F1DC" />
+        <SolidColorBrush x:Key="Role_label_Background" Color="#254638" />
+
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#F0F3FA" />
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#AEB8CC" />
+        <SolidColorBrush x:Key="TextMutedBrush" Color="#8190AA" />
+        <SolidColorBrush x:Key="AccentBrush" Color="#75D6AE" />
+        <SolidColorBrush x:Key="HoverWashBrush" Color="#14FFFFFF" />
+        <SolidColorBrush x:Key="LineBrush" Color="#1FFFFFFF" />
+
+        <DropShadowEffect x:Key="CardShadow"
+                          BlurRadius="28"
+                          ShadowDepth="7"
+                          Direction="270"
+                          Opacity="0.42"
+                          Color="#000000" />
+
+        <Style x:Key="TextButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Padding" Value="8,3" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonSurface"
+                                Background="Transparent"
+                                CornerRadius="7"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonSurface" Property="Background"
+                                        Value="{StaticResource HoverWashBrush}" />
+                                <Setter Property="Foreground" Value="#FFFFFF" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonSurface" Property="Background" Value="#22FFFFFF" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="IconButtonStyle" TargetType="Button" BasedOn="{StaticResource TextButtonStyle}">
+            <Setter Property="Width" Value="24" />
+            <Setter Property="Height" Value="24" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="ToolTipService.InitialShowDelay" Value="350" />
+        </Style>
+
+        <Style x:Key="CloseButtonStyle" TargetType="Button" BasedOn="{StaticResource IconButtonStyle}">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="#FFD8DE" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="RatingButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Margin" Value="4,0" />
+            <Setter Property="FontSize" Value="11.5" />
+            <Setter Property="FontWeight" Value="Normal" />
+            <Setter Property="Foreground" Value="#EDF2FA" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Opacity" Value="0.95" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="RatingSurface"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="9"
+                                Padding="4,0">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="RatingSurface" Property="BorderBrush" Value="#AAFFFFFF" />
+                                <Setter Property="Opacity" Value="1" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" Value="0.76" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="128" />
+            <Setter Property="Height" Value="38" />
+            <Setter Property="Foreground" Value="#F4FFF9" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="PrimarySurface"
+                                CornerRadius="10"
+                                BorderThickness="1"
+                                BorderBrush="#5575D6AE">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#3875D6AE" Offset="0" />
+                                    <GradientStop Color="#2E79AEF2" Offset="1" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="PrimarySurface" Property="BorderBrush" Value="#A075D6AE" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="PrimarySurface" Property="Opacity" Value="0.8" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ThinProgressStyle" TargetType="ProgressBar">
+            <Setter Property="Height" Value="2" />
+            <Setter Property="Foreground" Value="#99C4D6DA" />
+            <Setter Property="Background" Value="#14FFFFFF" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Grid x:Name="PART_Track">
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="1.5" />
+                            <Border x:Name="PART_Indicator"
+                                    HorizontalAlignment="Left"
+                                    Background="{TemplateBinding Foreground}"
+                                    CornerRadius="1.5" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid x:Name="RootGrid"
+          Background="Transparent"
+          MouseLeftButtonDown="RootGrid_MouseLeftButtonDown">
+
+        <Border Margin="34"
+                CornerRadius="24"
+                Effect="{DynamicResource CardShadow}">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#D91B2438" Offset="0" />
+                    <GradientStop Color="#D9121928" Offset="0.55" />
+                    <GradientStop Color="#D90C111D" Offset="1" />
+                </LinearGradientBrush>
+            </Border.Background>
+        </Border>
+
+        <Border x:Name="Card"
+                Margin="34"
+                CornerRadius="24"
+                BorderBrush="#28FFFFFF"
+                BorderThickness="1">
+
+            <Grid x:Name="CardClip"
+                  ClipToBounds="True"
+                  SizeChanged="CardClip_SizeChanged">
+
+                <Ellipse Width="310" Height="250"
+                         HorizontalAlignment="Left"
+                         VerticalAlignment="Top"
+                         Margin="-90,-120,0,0"
+                         IsHitTestVisible="False">
+                    <Ellipse.Fill>
+                        <RadialGradientBrush>
+                            <GradientStop Color="#3A4ED6C6" Offset="0" />
+                            <GradientStop Color="#164ED6C6" Offset="0.45" />
+                            <GradientStop Color="#004ED6C6" Offset="1" />
+                        </RadialGradientBrush>
+                    </Ellipse.Fill>
+                </Ellipse>
+
+                <Ellipse Width="330" Height="250"
+                         HorizontalAlignment="Right"
+                         VerticalAlignment="Bottom"
+                         Margin="0,0,-110,-110"
+                         IsHitTestVisible="False">
+                    <Ellipse.Fill>
+                        <RadialGradientBrush>
+                            <GradientStop Color="#366C62D8" Offset="0" />
+                            <GradientStop Color="#146C62D8" Offset="0.48" />
+                            <GradientStop Color="#006C62D8" Offset="1" />
+                        </RadialGradientBrush>
+                    </Ellipse.Fill>
+                </Ellipse>
+
+                <Border IsHitTestVisible="False">
+                    <Border.Background>
+                        <RadialGradientBrush Center="0.5,0.46"
+                                             GradientOrigin="0.5,0.46"
+                                             RadiusX="0.78"
+                                             RadiusY="0.9">
+                            <GradientStop Color="#1C000000" Offset="0" />
+                            <GradientStop Color="#12000000" Offset="0.6" />
+                            <GradientStop Color="#08000000" Offset="1" />
+                        </RadialGradientBrush>
+                    </Border.Background>
+                </Border>
+
+                <Rectangle x:Name="NoiseLayer"
+                           Opacity="0.55"
+                           IsHitTestVisible="False" />
+
+                <Border Height="1"
+                        VerticalAlignment="Top"
+                        Margin="24,0"
+                        IsHitTestVisible="False">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#00FFFFFF" Offset="0" />
+                            <GradientStop Color="#66FFFFFF" Offset="0.2" />
+                            <GradientStop Color="#66FFFFFF" Offset="0.8" />
+                            <GradientStop Color="#00FFFFFF" Offset="1" />
+                        </LinearGradientBrush>
+                    </Border.Background>
+                </Border>
+
+                <Border CornerRadius="23"
+                        BorderBrush="#12FFFFFF"
+                        BorderThickness="1"
+                        IsHitTestVisible="False" />
+
+                <Grid Margin="20,15,20,12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- 顶栏 -->
+                    <Grid Grid.Row="0" Height="24">
+                        <StackPanel Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <Ellipse Width="5"
+                                     Height="5"
+                                     Margin="1,0,8,0"
+                                     Fill="#75D6AE" />
+                            <TextBlock Text="词浮"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"
+                                       Foreground="#E9EFFB"
+                                       VerticalAlignment="Center" />
+                            <StackPanel Orientation="Horizontal"
+                                        Margin="7,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Visibility="{Binding IsReading, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="· "
+                                           FontSize="11.5"
+                                           Foreground="#95A3BC" />
+                                <TextBlock Text="{Binding CurrentListName}"
+                                           FontSize="11.5"
+                                           Foreground="#95A3BC" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center">
+                            <Button x:Name="EndButton"
+                                    Content="结束"
+                                    Style="{StaticResource TextButtonStyle}"
+                                    Margin="0,0,4,0"
+                                    ToolTip="结束本次学习"
+                                    Visibility="{Binding IsReading, Converter={StaticResource BoolToVisibility}}"
+                                    Click="EndButton_Click" />
+                            <Button Style="{StaticResource IconButtonStyle}"
+                                    Content="&#xE713;"
+                                    ToolTip="设置"
+                                    Click="SettingsButton_Click" />
+                            <Button Style="{StaticResource CloseButtonStyle}"
+                                    Content="&#xE711;"
+                                    ToolTip="退出词浮"
+                                    Click="CloseButton_Click" />
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- 开始页 -->
+                    <Grid Grid.Row="1"
+                          Visibility="{Binding IsReady, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Margin="0,-2,0,6">
+                            <TextBlock Text="把单词，浮在眼前"
+                                       HorizontalAlignment="Center"
+                                       FontSize="22"
+                                       FontWeight="SemiBold"
+                                       Foreground="#F5F8FF" />
+                            <TextBlock Text="{Binding SummaryLine}"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,10,0,0"
+                                       FontSize="11.5"
+                                       Foreground="#9DABC3" />
+                            <Button Content="开始吧"
+                                    Margin="0,20,0,0"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Visibility="{Binding HasCurrentList, Converter={StaticResource BoolToVisibility}}"
+                                    Click="StartButton_Click" />
+                            <Button Content="导入词书"
+                                    Margin="0,20,0,0"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Visibility="{Binding HasNoCurrentList, Converter={StaticResource BoolToVisibility}}"
+                                    Click="ImportButton_Click" />
+                            <TextBlock Text="{Binding HoverHint}"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,18,0,0"
+                                       FontSize="10.5"
+                                       Foreground="#8492AA" />
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- 阅读页 -->
+                    <Grid Grid.Row="1"
+                          Visibility="{Binding IsReading, Converter={StaticResource BoolToVisibility}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <ScrollViewer Grid.Row="0"
+                                      VerticalScrollBarVisibility="Hidden"
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      Margin="0,6,0,10"
+                                      Padding="0,0,4,0">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Reading.Headword}"
+                                               Margin="0,1,0,0"
+                                               FontFamily="{DynamicResource Role_headword_FontFamily}"
+                                               FontSize="{DynamicResource Role_headword_FontSize}"
+                                               FontWeight="{DynamicResource Role_headword_FontWeight}"
+                                               FontStyle="{DynamicResource Role_headword_FontStyle}"
+                                               Foreground="{DynamicResource Role_headword_Foreground}"
+                                               TextOptions.TextFormattingMode="Ideal" />
+                                    <ItemsControl ItemsSource="{Binding Reading.Labels}"
+                                                  Margin="12,0,0,0"
+                                                  VerticalAlignment="Center">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Padding="6,1"
+                                                        Margin="0,0,6,0"
+                                                        CornerRadius="5"
+                                                        Background="{DynamicResource Role_label_Background}"
+                                                        BorderBrush="#3A75D6AE"
+                                                        BorderThickness="1"
+                                                        VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Text}"
+                                                               FontFamily="{DynamicResource Role_label_FontFamily}"
+                                                               FontSize="{DynamicResource Role_label_FontSize}"
+                                                               FontWeight="{DynamicResource Role_label_FontWeight}"
+                                                               FontStyle="{DynamicResource Role_label_FontStyle}"
+                                                               Foreground="{DynamicResource Role_label_Foreground}" />
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal"
+                                            Margin="0,2,0,0">
+                                    <StackPanel Orientation="Horizontal"
+                                                Visibility="{Binding Reading.ShowUk, Converter={StaticResource BoolToVisibility}}">
+                                        <TextBlock Text="UK"
+                                                   FontFamily="Segoe UI"
+                                                   FontSize="9.5"
+                                                   Foreground="#73839C"
+                                                   VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding Reading.PhoneticUk}"
+                                                   Margin="4,0,0,0"
+                                                   FontFamily="{DynamicResource Role_phonetic_FontFamily}"
+                                                   FontSize="{DynamicResource Role_phonetic_FontSize}"
+                                                   FontWeight="{DynamicResource Role_phonetic_FontWeight}"
+                                                   FontStyle="{DynamicResource Role_phonetic_FontStyle}"
+                                                   Foreground="{DynamicResource Role_phonetic_Foreground}"
+                                                   VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal"
+                                                Margin="10,0,0,0"
+                                                Visibility="{Binding Reading.ShowUs, Converter={StaticResource BoolToVisibility}}">
+                                        <TextBlock Text="US"
+                                                   FontFamily="Segoe UI"
+                                                   FontSize="9.5"
+                                                   Foreground="#73839C"
+                                                   VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding Reading.PhoneticUs}"
+                                                   Margin="4,0,0,0"
+                                                   FontFamily="{DynamicResource Role_phonetic_FontFamily}"
+                                                   FontSize="{DynamicResource Role_phonetic_FontSize}"
+                                                   FontWeight="{DynamicResource Role_phonetic_FontWeight}"
+                                                   FontStyle="{DynamicResource Role_phonetic_FontStyle}"
+                                                   Foreground="{DynamicResource Role_phonetic_Foreground}"
+                                                   VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <Border Height="1"
+                                        Margin="0,6,0,7"
+                                        Background="#1FFFFFFF" />
+
+                                <ItemsControl ItemsSource="{Binding Reading.Senses}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,0,0,6">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="26" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0"
+                                                           Text="{Binding PartOfSpeech}"
+                                                           FontFamily="{DynamicResource Role_pos_FontFamily}"
+                                                           FontSize="{DynamicResource Role_pos_FontSize}"
+                                                           FontWeight="{DynamicResource Role_pos_FontWeight}"
+                                                           FontStyle="{DynamicResource Role_pos_FontStyle}"
+                                                           Foreground="{DynamicResource Role_pos_Foreground}"
+                                                           VerticalAlignment="Top" />
+                                                <StackPanel Grid.Column="1">
+                                                    <ItemsControl ItemsSource="{Binding Definitions}">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <StackPanel Margin="0,0,0,3">
+                                                                    <TextBlock Text="{Binding PrimaryText}"
+                                                                               FontFamily="{DynamicResource Role_definition_FontFamily}"
+                                                                               FontSize="{DynamicResource Role_definition_FontSize}"
+                                                                               FontWeight="{DynamicResource Role_definition_FontWeight}"
+                                                                               FontStyle="{DynamicResource Role_definition_FontStyle}"
+                                                                               Foreground="{DynamicResource Role_definition_Foreground}"
+                                                                               TextWrapping="Wrap"
+                                                                               LineHeight="24"
+                                                                               LineStackingStrategy="BlockLineHeight" />
+                                                                </StackPanel>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+
+                                                    <ItemsControl ItemsSource="{Binding Examples}"
+                                                                  Margin="0,5,0,0"
+                                                                  Visibility="{Binding HasExamples, Converter={StaticResource BoolToVisibility}}">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <StackPanel Margin="0,0,0,3">
+                                                                    <TextBlock Text="{Binding PrimaryText}"
+                                                                               FontFamily="{DynamicResource Role_example_FontFamily}"
+                                                                               FontSize="{DynamicResource Role_example_FontSize}"
+                                                                               FontWeight="{DynamicResource Role_example_FontWeight}"
+                                                                               FontStyle="{DynamicResource Role_example_FontStyle}"
+                                                                               Foreground="{DynamicResource Role_example_Foreground}"
+                                                                               TextWrapping="Wrap"
+                                                                               LineHeight="19"
+                                                                               LineStackingStrategy="BlockLineHeight" />
+                                                                    <TextBlock Text="{Binding SecondaryText}"
+                                                                               FontFamily="{DynamicResource Role_exampleTranslation_FontFamily}"
+                                                                               FontSize="{DynamicResource Role_exampleTranslation_FontSize}"
+                                                                               FontWeight="{DynamicResource Role_exampleTranslation_FontWeight}"
+                                                                               FontStyle="{DynamicResource Role_exampleTranslation_FontStyle}"
+                                                                               Foreground="{DynamicResource Role_exampleTranslation_Foreground}"
+                                                                               TextWrapping="Wrap"
+                                                                               LineHeight="18"
+                                                                               LineStackingStrategy="BlockLineHeight"
+                                                                               Visibility="{Binding HasSecondary, Converter={StaticResource BoolToVisibility}}" />
+                                                                </StackPanel>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </StackPanel>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <TextBlock Text="{Binding Reading.ErrorMessage}"
+                                           Margin="0,4,0,0"
+                                           FontSize="11.5"
+                                           Foreground="#F3A3AE"
+                                           TextWrapping="Wrap"
+                                           Visibility="{Binding Reading.HasError, Converter={StaticResource BoolToVisibility}}" />
+                            </StackPanel>
+                        </ScrollViewer>
+
+                        <StackPanel Grid.Row="1">
+                            <TextBlock Text="{Binding Reading.PauseNotice}"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,0,0,4"
+                                       FontSize="10"
+                                       Foreground="#9DB6C0"
+                                       Visibility="{Binding Reading.IsHoverPaused, Converter={StaticResource BoolToVisibility}}" />
+
+                            <ItemsControl ItemsSource="{Binding Reading.Ratings}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Columns="4" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Content="{Binding DisplayText}"
+                                                Background="{Binding Background}"
+                                                BorderBrush="{Binding BorderBrush}"
+                                                Foreground="{Binding Foreground}"
+                                                Style="{StaticResource RatingButtonStyle}"
+                                                Command="{Binding DataContext.Reading.RateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding Id}" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <Grid Width="320"
+                                  HorizontalAlignment="Center"
+                                  Margin="0,9,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <ProgressBar Grid.Column="0"
+                                             Maximum="1"
+                                             Value="{Binding Reading.Progress, Mode=OneWay}"
+                                             Style="{StaticResource ThinProgressStyle}"
+                                             VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1"
+                                           Margin="8,0,0,0"
+                                           FontSize="10"
+                                           Foreground="#6F7E96"
+                                           VerticalAlignment="Center">
+                                    <Run Text="{Binding Reading.RemainingSeconds, Mode=OneWay}" />
+                                    <Run Text="s" />
+                                </TextBlock>
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- 空状态 / 错误状态 -->
+                    <Grid Grid.Row="1"
+                          Visibility="{Binding IsState, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    MaxWidth="320">
+                            <TextBlock Text="{Binding StateMessage}"
+                                       HorizontalAlignment="Center"
+                                       TextAlignment="Center"
+                                       FontSize="14"
+                                       Foreground="#DCE4F2"
+                                       TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding ErrorMessage}"
+                                       HorizontalAlignment="Center"
+                                       TextAlignment="Center"
+                                       Margin="0,6,0,0"
+                                       FontSize="11.5"
+                                       Foreground="#F3A3AE"
+                                       TextWrapping="Wrap"
+                                       Visibility="{Binding IsError, Converter={StaticResource BoolToVisibility}}" />
+                            <StackPanel Orientation="Horizontal"
+                                        HorizontalAlignment="Center"
+                                        Margin="0,18,0,0">
+                                <Button Content="打开设置"
+                                        Style="{StaticResource TextButtonStyle}"
+                                        Margin="0,0,8,0"
+                                        Click="SettingsButton_Click" />
+                                <Button Content="重试"
+                                        Style="{StaticResource TextButtonStyle}"
+                                        Click="RetryButton_Click" />
+                                <Button Content="导入词书"
+                                        Style="{StaticResource TextButtonStyle}"
+                                        Margin="8,0,0,0"
+                                        Click="ImportButton_Click" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <Thumb Width="18"
+               Height="18"
+               Margin="8"
+               HorizontalAlignment="Right"
+               VerticalAlignment="Bottom"
+               Opacity="0"
+               Cursor="SizeNWSE"
+               DragDelta="ResizeThumb_DragDelta" />
     </Grid>
 </Window>

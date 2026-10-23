@@ -8,5 +8,9 @@
         <RootNamespace>FloatingWords</RootNamespace>
     </PropertyGroup>
 
-</Project>
+    <ItemGroup>
+        <ProjectReference Include="..\FloatingWords.Application\FloatingWords.Application.csproj" />
+        <ProjectReference Include="..\FloatingWords.Infrastructure\FloatingWords.Infrastructure.csproj" />
+    </ItemGroup>
 
+</Project>
